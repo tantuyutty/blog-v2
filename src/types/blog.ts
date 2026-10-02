@@ -7,6 +7,5 @@ export interface BlogPost {
   tags: string[];
   category?: string;
   draft?: boolean;
-  chatWithAI?: boolean;
   excerpt?: string;
 }
