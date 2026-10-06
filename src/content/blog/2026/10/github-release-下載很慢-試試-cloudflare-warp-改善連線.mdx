@@ -1,0 +1,56 @@
+---
+title: "GitHub Release 下載很慢？試試 Cloudflare WARP 改善連線"
+description: "解決 HiNet 連線 GitHub Release 下載速度過慢的問題。透過免費的 Cloudflare WARP 改善網路路由，並解決 WSL2 啟用 WARP 後的網路斷線狀況。"
+pubDate: "2026-10-06T15:34:33.910Z"
+tags: ["GitHub", "Cloudflare WARP", "WSL2", "網路優化", "HiNet", "Troubleshooting"]
+category: "網路"
+---
+
+## 前情提要
+
+每當我想要嘗試在 [mise](https://mise.jdx.dev/) 上安裝或更新套件工具時，每次只要是使用 GitHub Release 下載的檔案，速度都非常慢，甚至有時候會斷線或失敗。
+
+每次一想到要更新，看他下載速度永遠是不到 100 KB/s，我就覺得很煩躁，甚至直接放棄。
+
+自己在 speedtest.net 上測試，下載速度大約是 25 Mbps（約 3MB/s），跟在 mise 更新的速度時間上慢了 30 倍！但為什麼 GitHub Release 下載速度卻這麼慢呢？
+
+跟我的 ChatGPT 討論一下有哪些原因，但我剛開始什麼環境也沒說，它卻似乎把其中一個矛頭指向了：HiNet 到 GitHub Release CDN 的網路路由可能異常或壅塞。
+
+（其實我自己先前已經問過數遍，排除很多可能的原因，最後一直覺得就是這段路由有問題）
+
+所以如何解決？
+
+## 解決方法
+
+既然問題可能出在路由品質，那最直接的處理方式，就是換一條路走，找一條你信任或覺得品質不錯的路由，來改善 GitHub Release 下載速度。
+
+我使用的是 [Cloudflare WARP](https://one.one.one.one/)。它可以視為一種偏向網路路由與連線安全用途的 VPN，啟用後，流量不再直接由 HiNet 連往 GitHub，而是先進入 Cloudflare 的網路，再由 Cloudflare 轉送到 GitHub。
+
+這樣子就從 HiNet → GitHub Release CDN 這條路，改成了 HiNet → Cloudflare → GitHub Release CDN，換了一條路線後，下載速度就明顯改善了，回到原本在我這裡正常情況下的約 3 MB/s。
+
+且該服務本身是免費的，對於一般使用者來說，沒有任何成本。
+
+如果你也是 HiNet 的使用者，且在 GitHub Release 下載上遇到速度慢的問題，你可以試試看 Cloudflare WARP。
+
+## 使用方式
+
+安裝完，剛開啟 Cloudflare One Client 後，選擇左邊的私人瀏覽（Private browsing）即可開啟，看使用情況決定你是否要一直處於連線狀態。
+
+模式選擇預設的「流量和 DNS (UDP)」即可，但通常主要是流量路徑問題，所以只選「僅流量」也可以正常運作，畢竟不是 DNS 解析出問題。
+
+## WSL 新問題
+
+啊，我的 Cloudflare WARP 已經啟動，Windows 內也正常顯示已連線，但為何我的 WSL 內似乎網路直接爆炸呢？
+
+WARP 啟用後會改變 Windows 的網路介面、路由表與 DNS 處理方式，WSL2 本身又不是直接使用實體網卡，如果 WSL 使用的虛擬網段、Gateway 或 DNS 流量也被錯誤導入 WARP Tunnel，就可能導致 WSL 無法正確找到 Windows 主機或外部網路。
+
+解決方式也算簡單，只要改用 Mirrored Networking 模式，讓 WSL2 直接使用實體網卡的網路設定，而不是透過 Windows 的虛擬網路，就可以解決這個問題。
+
+修改：`%UserProfile%\.wslconfig` Windows 使用者目錄下的 `.wslconfig` 加入下方設置：
+
+```text
+[wsl2]
+dnsTunneling=true
+networkingMode=mirrored
+autoProxy=true
+```
