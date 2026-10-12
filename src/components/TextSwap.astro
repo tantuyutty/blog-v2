@@ -11,13 +11,7 @@ type Props = Omit<HTMLAttributes<"span">, "data-state"> & {
   state?: TextSwapState;
 };
 
-const {
-  textA,
-  textB,
-  state = "a",
-  class: className,
-  ...props
-} = Astro.props;
+const { textA, textB, state = "a", class: className, ...props } = Astro.props;
 const initialText = state === "a" ? textA : textB;
 ---
 
@@ -82,7 +76,10 @@ const initialText = state === "a" ? textA : textB;
         if (busy || element.textContent === target) return;
 
         const duration = getTransitionTime(element);
-        if (duration <= 0 || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        if (
+          duration <= 0 ||
+          matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) {
           element.textContent = target;
           element.classList.remove("is-exit", "is-enter-start");
           return;

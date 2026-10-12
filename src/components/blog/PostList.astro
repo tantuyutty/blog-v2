@@ -16,23 +16,21 @@ const lastVisibleIndex = pageSize ? firstVisibleIndex + pageSize : posts.length;
 ---
 
 <div class="group/item-group flex flex-col gap-2" data-post-list>
-  {
-    posts.map((post, index) => {
-      const isVisible = index >= firstVisibleIndex && index < lastVisibleIndex;
+  {posts.map((post, index) => {
+    const isVisible = index >= firstVisibleIndex && index < lastVisibleIndex;
 
-      return (
-        <div
-          data-post-item
-          data-title={post.title.toLowerCase()}
-          data-tags={JSON.stringify(post.tags.map((tag) => tag.toLowerCase()))}
-          data-category={post.category?.toLowerCase() ?? ""}
-          hidden={!isVisible}
-        >
-          <PostCard post={post} />
-        </div>
-      );
-    })
-  }
+    return (
+      <div
+        data-post-item
+        data-title={post.title.toLowerCase()}
+        data-tags={JSON.stringify(post.tags.map((tag) => tag.toLowerCase()))}
+        data-category={post.category?.toLowerCase() ?? ""}
+        hidden={!isVisible}
+      >
+        <PostCard post={post} />
+      </div>
+    );
+  })}
 </div>
 
 <script>

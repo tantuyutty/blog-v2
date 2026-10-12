@@ -2,9 +2,9 @@
 import Heading from "./Heading.astro";
 ---
 
-<Heading level={6} {...Astro.props}
-  ><slot /><span
-    class="text-muted-foreground group-hover:text-foreground ml-1 text-xs transition-colors select-none"
-    >H6</span
-  ></Heading
->
+<Heading level={6} {...Astro.props}>
+  <slot />
+  <span class="text-muted-foreground group-hover:text-foreground ml-1 text-xs transition-colors select-none">
+    H6
+  </span>
+</Heading>

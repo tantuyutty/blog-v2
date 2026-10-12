@@ -30,7 +30,9 @@ import IconSwap from "@/components/IconSwap.astro";
     connectedCallback() {
       this.abortController?.abort();
       this.abortController = new AbortController();
-      this.button = this.querySelector<HTMLButtonElement>("[data-theme-toggle]");
+      this.button = this.querySelector<HTMLButtonElement>(
+        "[data-theme-toggle]",
+      );
       this.iconSwap = this.querySelector<HTMLElement>("[data-theme-swap]");
 
       const signal = this.abortController.signal;

@@ -1,7 +1,20 @@
 import { useMemo, useState } from "react";
 import type { BlogPost } from "@/types/blog";
 
-const MONTH_NAMES = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+const MONTH_NAMES = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+];
 const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", "Sun"];
 
 function toKey(d: Date) {
@@ -20,7 +33,11 @@ interface Props {
   compact?: boolean;
 }
 
-export default function PostCalendar({ posts, numWeeks = 52, compact = false }: Props) {
+export default function PostCalendar({
+  posts,
+  numWeeks = 52,
+  compact = false,
+}: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
 
   const postsByDate = useMemo(() => {
@@ -198,7 +215,10 @@ export default function PostCalendar({ posts, numWeeks = 52, compact = false }: 
               {hoveredPosts.map((p, i) => (
                 <span key={p.id}>
                   {i > 0 && ", "}
-                  <a href={`/blog/${p.id}`} className="text-foreground hover:underline">
+                  <a
+                    href={`/blog/${p.id}`}
+                    className="text-foreground hover:underline"
+                  >
                     {p.title}
                   </a>
                 </span>

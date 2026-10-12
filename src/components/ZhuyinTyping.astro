@@ -16,9 +16,9 @@ const { text, speed = 180, zhuyinSpeed = 90, class: className } = Astro.props;
   data-speed={speed}
   data-zhuyin-speed={zhuyinSpeed}
 >
-  <span class="typing-text"></span><span class="zhuyin-draft"></span><span
-    class="cursor">▍</span
-  >
+  <span class="typing-text"></span>
+  <span class="zhuyin-draft"></span>
+  <span class="cursor">▍</span>
 </span>
 
 <style>
@@ -44,7 +44,6 @@ const { text, speed = 180, zhuyinSpeed = 90, class: className } = Astro.props;
 </style>
 
 <script>
-
   const zhuyinMap: Record<string, string> = {
     還: "ㄏㄞˊ",
     沒: "ㄇㄟˊ",
@@ -87,7 +86,10 @@ const { text, speed = 180, zhuyinSpeed = 90, class: className } = Astro.props;
   });
 
   function toGraphemes(text: string): string[] {
-    return Array.from(graphemeSegmenter.segment(text), ({ segment }) => segment);
+    return Array.from(
+      graphemeSegmenter.segment(text),
+      ({ segment }) => segment,
+    );
   }
 
   class ZhuyinTyper {

@@ -99,34 +99,30 @@ if (chatWithAI) {
 
       <!-- Center: article -->
       <article id="content" class="w-full min-w-0">
-        {
-          heroImage && (
-            <div class="mb-4 md:mb-8">
-              <Image
-                width={1020}
-                height={510}
-                src={heroImage}
-                alt="hero image"
-                class="rounded-xl"
-                transition:name={`article-hero-${slug.replaceAll("/", "-")}`}
-              />
-            </div>
-          )
-        }
+        {heroImage && (
+          <div class="mb-4 md:mb-8">
+            <Image
+              width={1020}
+              height={510}
+              src={heroImage}
+              alt="hero image"
+              class="rounded-xl"
+              transition:name={`article-hero-${slug.replaceAll("/", "-")}`}
+            />
+          </div>
+        )}
         <section class="mb-4 flex flex-col gap-4" data-article-header>
-          {
-            (category || tags.length > 0) && (
-              <div class="flex flex-row flex-wrap gap-2">
-                {category && <Badge variant="category">{category}</Badge>}
-                {tags.length > 0 &&
-                  tags.map((tag) => (
-                    <Badge variant="tag" class="">
-                      #{tag}
-                    </Badge>
-                  ))}
-              </div>
-            )
-          }
+          {(category || tags.length > 0) && (
+            <div class="flex flex-row flex-wrap gap-2">
+              {category && <Badge variant="category">{category}</Badge>}
+              {tags.length > 0 &&
+                tags.map((tag) => (
+                  <Badge variant="tag" class="">
+                    #{tag}
+                  </Badge>
+                ))}
+            </div>
+          )}
           <div class="flex flex-wrap items-center gap-2">
             <h1
               id="article-title"
@@ -135,59 +131,47 @@ if (chatWithAI) {
             >
               {title}
             </h1>
-            {
-              import.meta.env.DEV && draft && (
-                <Badge variant="tag" class="shrink-0">
-                  草稿
-                </Badge>
-              )
-            }
+            {import.meta.env.DEV && draft && (
+              <Badge variant="tag" class="shrink-0">
+                草稿
+              </Badge>
+            )}
           </div>
-          <div
-            class="text-muted-foreground flex flex-wrap items-center gap-4 text-xs"
-          >
-            {
-              pubDate && (
-                <div class="flex items-center gap-1.5">
-                  <Calendar class="size-4" />
-                  <span class="font-serif font-bold">
-                    <RelativeTime dateStr={pubDate} />
-                  </span>
-                </div>
-              )
-            }
-            {
-              minutesRead && (
-                <div class="flex items-center gap-1.5">
-                  <Timer class="size-4" />
-                  <span class="font-serif font-bold">{readTime} 分鐘</span>
-                </div>
-              )
-            }
-            {
-              wordCount && (
-                <div class="flex items-center gap-1.5">
-                  <Type class="size-4" />
-                  <span class="font-serif font-bold">約 {wordCount} 字</span>
-                </div>
-              )
-            }
+          <div class="text-muted-foreground flex flex-wrap items-center gap-4 text-xs">
+            {pubDate && (
+              <div class="flex items-center gap-1.5">
+                <Calendar class="size-4" />
+                <span class="font-serif font-bold">
+                  <RelativeTime dateStr={pubDate} />
+                </span>
+              </div>
+            )}
+            {minutesRead && (
+              <div class="flex items-center gap-1.5">
+                <Timer class="size-4" />
+                <span class="font-serif font-bold">{readTime} 分鐘</span>
+              </div>
+            )}
+            {wordCount && (
+              <div class="flex items-center gap-1.5">
+                <Type class="size-4" />
+                <span class="font-serif font-bold">約 {wordCount} 字</span>
+              </div>
+            )}
           </div>
         </section>
 
         <!-- Warning for outdated post -->
-        {
-          isOutdated && (
-            <>
-              <div class="bg-card flex items-center gap-2 rounded-md border p-4">
-                <TriangleAlert class="size-3.5 text-yellow-500/50" />
-                <span class="text-muted-foreground -translate-y-px font-serif text-sm font-bold">
-                  此文章可能已經過時，內容僅供參考。
-                </span>
-              </div>
-            </>
-          )
-        }
+        {isOutdated && (
+          <>
+            <div class="bg-card flex items-center gap-2 rounded-md border p-4">
+              <TriangleAlert class="size-3.5 text-yellow-500/50" />
+              <span class="text-muted-foreground -translate-y-px font-serif text-sm font-bold">
+                此文章可能已經過時，內容僅供參考。
+              </span>
+            </div>
+          </>
+        )}
 
         <Separator class="my-6" />
         <div class="prose">
@@ -204,46 +188,44 @@ if (chatWithAI) {
           </div>
         </div>
 
-        {
-          (prevPost || nextPost) && (
-            <>
-              <nav class="not-prose mt-4 grid grid-cols-2 gap-4">
-                <div>
-                  {prevPost && (
-                    <a
-                      href={`/blog/${prevPost.id}`}
-                      class="group flex flex-col gap-1"
-                    >
-                      <span class="text-muted-foreground flex items-center gap-1 text-xs transition-all group-hover:-translate-x-2">
-                        <ChevronLeft class="size-3" />
-                        上一篇
-                      </span>
-                      <span class="group-hover:text-primary line-clamp-2 font-serif text-sm font-medium transition-colors">
-                        {prevPost.title}
-                      </span>
-                    </a>
-                  )}
-                </div>
-                <div class="text-right">
-                  {nextPost && (
-                    <a
-                      href={`/blog/${nextPost.id}`}
-                      class="group flex flex-col items-end gap-1"
-                    >
-                      <span class="text-muted-foreground flex items-center gap-1 text-xs transition-all group-hover:translate-x-2">
-                        下一篇
-                        <ChevronRight class="size-3" />
-                      </span>
-                      <span class="group-hover:text-primary line-clamp-2 font-serif text-sm font-medium transition-colors">
-                        {nextPost.title}
-                      </span>
-                    </a>
-                  )}
-                </div>
-              </nav>
-            </>
-          )
-        }
+        {(prevPost || nextPost) && (
+          <>
+            <nav class="not-prose mt-4 grid grid-cols-2 gap-4">
+              <div>
+                {prevPost && (
+                  <a
+                    href={`/blog/${prevPost.id}`}
+                    class="group flex flex-col gap-1"
+                  >
+                    <span class="text-muted-foreground flex items-center gap-1 text-xs transition-all group-hover:-translate-x-2">
+                      <ChevronLeft class="size-3" />
+                      上一篇
+                    </span>
+                    <span class="group-hover:text-primary line-clamp-2 font-serif text-sm font-medium transition-colors">
+                      {prevPost.title}
+                    </span>
+                  </a>
+                )}
+              </div>
+              <div class="text-right">
+                {nextPost && (
+                  <a
+                    href={`/blog/${nextPost.id}`}
+                    class="group flex flex-col items-end gap-1"
+                  >
+                    <span class="text-muted-foreground flex items-center gap-1 text-xs transition-all group-hover:translate-x-2">
+                      下一篇
+                      <ChevronRight class="size-3" />
+                    </span>
+                    <span class="group-hover:text-primary line-clamp-2 font-serif text-sm font-medium transition-colors">
+                      {nextPost.title}
+                    </span>
+                  </a>
+                )}
+              </div>
+            </nav>
+          </>
+        )}
       </article>
 
       <!-- Right: TOC -->
@@ -281,7 +263,6 @@ if (chatWithAI) {
         });
       }
     </script>
-
     <script>
       function setupCopyButtons() {
         document
@@ -311,7 +292,6 @@ if (chatWithAI) {
       setupCopyButtons();
       document.addEventListener("astro:page-load", setupCopyButtons);
     </script>
-
     <script>
       import PhotoSwipeLightbox from "photoswipe/lightbox";
       import PhotoSwipe from "photoswipe";

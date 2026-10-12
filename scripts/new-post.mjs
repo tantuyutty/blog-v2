@@ -71,7 +71,9 @@ async function main() {
     if (error.code === "EEXIST") {
       console.error(`File already exists: ${relative(ROOT_DIR, filePath)}`);
     } else {
-      console.error(`Failed to create ${relative(ROOT_DIR, filePath)}: ${error.message}`);
+      console.error(
+        `Failed to create ${relative(ROOT_DIR, filePath)}: ${error.message}`,
+      );
     }
     process.exitCode = 1;
     return;

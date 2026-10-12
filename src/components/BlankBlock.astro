@@ -6,5 +6,7 @@ interface Props {
 const { class: className } = Astro.props;
 ---
 
-<div class:list={["hidden md:block md:h-22", className]} aria-hidden="true">
-</div>
+<div
+  class:list={["hidden md:block md:h-22", className]}
+  aria-hidden="true"
+></div>
