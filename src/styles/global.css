@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@plugin "tailwindcss-animate";
 @import "./prism.css";
 @import "./transitions.css";
 @import "./typeset.css";
