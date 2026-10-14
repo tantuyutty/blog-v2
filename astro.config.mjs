@@ -17,7 +17,7 @@ import partytown from "@astrojs/partytown";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://v2.ttymayor.com",
+  site: "https://blog.tantuyu.dev",
   prefetchAll: false,
   fonts: [
     {
