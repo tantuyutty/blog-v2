@@ -42,6 +42,8 @@ Any static assets, like images, can be placed in the `public/` directory.
 
 ## 🧞 Commands
 
+Requires Node.js 22 or later and pnpm 10.11.1.
+
 All commands are run from the root of the project, from a terminal:
 
 | Command                | Action                                           |

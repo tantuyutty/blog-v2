@@ -1,7 +1,15 @@
-allowBuilds:
-  esbuild: true
-  sharp: true
-  workerd: true
+packages:
+  - "."
+autoInstallPeers: false
+packageExtensions:
+  geist@1.7.2:
+    peerDependenciesMeta:
+      next:
+        optional: true
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd
 trustPolicyExclude:
   - chokidar@4.0.3
   - semver@6.3.1

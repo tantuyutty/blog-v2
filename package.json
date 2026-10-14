@@ -2,6 +2,10 @@
   "name": "blog-v2",
   "version": "0.0.1",
   "type": "module",
+  "packageManager": "pnpm@10.11.1",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
