@@ -5,14 +5,7 @@ import { join } from "node:path";
 import satori from "satori";
 import sharp from "sharp";
 
-const fontDir = join(
-  process.cwd(),
-  "node_modules",
-  "geist",
-  "dist",
-  "fonts",
-  "geist-sans",
-);
+const fontDir = join(process.cwd(), "src", "assets", "fonts", "geist");
 
 const fontRegular = readFileSync(join(fontDir, "Geist-Regular.ttf"));
 const fontBold = readFileSync(join(fontDir, "Geist-Bold.ttf"));
@@ -155,7 +148,7 @@ export async function renderOgImage({
                   type: "div",
                   props: {
                     style: { display: "flex" },
-                    children: "v2.ttymayor.com",
+                    children: "blog.tantuyu.dev",
                   },
                 },
               ],

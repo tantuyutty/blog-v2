@@ -1,10 +1,8 @@
 lockfileVersion: '9.0'
 
 settings:
-  autoInstallPeers: false
+  autoInstallPeers: true
   excludeLinksFromLockfile: false
-
-packageExtensionsChecksum: sha256-Io3nR+Ynxwpn7rpSUvwN8hHV2N5luLMsuTuq5e/SBc4=
 
 importers:
 
@@ -73,9 +71,6 @@ importers:
       cn:
         specifier: ^0.4.0
         version: 0.4.0
-      geist:
-        specifier: ^1.7.2
-        version: 1.7.2
       katex:
         specifier: ^0.18.9
         version: 0.18.9
@@ -2877,14 +2872,6 @@ packages:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
-
-  geist@1.7.2:
-    resolution: {integrity: sha512-Gu5lDFa3pLRyoBlBPf0QIFHVdWAnpco7fS1bJm41jyLPFoguBgiubseUN2oLXMgqZ7uxAxDoXcHMhCY/fOTTgg==}
-    peerDependencies:
-      next: '>=13.2.0'
-    peerDependenciesMeta:
-      next:
-        optional: true
 
   get-caller-file@2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
@@ -6924,8 +6911,6 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
-
-  geist@1.7.2: {}
 
   get-caller-file@2.0.5: {}
 

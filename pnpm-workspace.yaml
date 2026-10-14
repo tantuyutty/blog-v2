@@ -1,11 +1,5 @@
 packages:
   - "."
-autoInstallPeers: false
-packageExtensions:
-  geist@1.7.2:
-    peerDependenciesMeta:
-      next:
-        optional: true
 onlyBuiltDependencies:
   - esbuild
   - sharp
