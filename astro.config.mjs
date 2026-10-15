@@ -21,19 +21,29 @@ export default defineConfig({
   prefetchAll: false,
   fonts: [
     {
-      name: "Noto Serif TC",
-      cssVariable: "--font-serif",
-      provider: fontProviders.google(),
-    },
-    {
-      name: "Geist",
-      cssVariable: "--font-geist",
-      provider: fontProviders.google(),
-    },
-    {
-      name: "Geist Mono",
-      cssVariable: "--font-geist-mono",
-      provider: fontProviders.google(),
+      name: "Noto Sans TC",
+      cssVariable: "--font-noto-sans-tc",
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          {
+            src: [
+              "./src/assets/fonts/noto-sans-tc/NotoSansTC-Regular.woff2",
+              "./src/assets/fonts/noto-sans-tc/NotoSansTC-Regular.ttf",
+            ],
+            weight: 400,
+            style: "normal",
+          },
+          {
+            src: [
+              "./src/assets/fonts/noto-sans-tc/NotoSansTC-Bold.woff2",
+              "./src/assets/fonts/noto-sans-tc/NotoSansTC-Bold.ttf",
+            ],
+            weight: 700,
+            style: "normal",
+          },
+        ],
+      },
     },
   ],
   markdown: {

@@ -5,40 +5,14 @@ import { join } from "node:path";
 import satori from "satori";
 import sharp from "sharp";
 
-const fontDir = join(process.cwd(), "src", "assets", "fonts", "geist");
+const fontDir = join(process.cwd(), "src", "assets", "fonts");
+const geistFontDir = join(fontDir, "geist");
+const cjkFontDir = join(fontDir, "noto-sans-tc");
 
-const fontRegular = readFileSync(join(fontDir, "Geist-Regular.ttf"));
-const fontBold = readFileSync(join(fontDir, "Geist-Bold.ttf"));
-
-// Fetch Noto Sans TC once per weight at module load time using a broad
-// fixed character set, so individual OG renders never hit the network.
-async function fetchCjkFont(weight: 400 | 700): Promise<ArrayBuffer | null> {
-  const cssUrl = `https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@${weight}`;
-  try {
-    const css = await fetch(cssUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-      signal: AbortSignal.timeout(10000),
-    }).then((r) => r.text());
-    const match = css.match(
-      /src:\s*url\(([^)]+)\)\s*format\('(woff2?|truetype)'\)/,
-    );
-    if (!match) return null;
-    return await fetch(match[1], {
-      signal: AbortSignal.timeout(10000),
-    }).then((r) => r.arrayBuffer());
-  } catch (err) {
-    console.warn("[og] CJK font fetch failed:", (err as Error).message);
-    return null;
-  }
-}
-
-const [cjkRegularPromise, cjkBoldPromise] = [
-  fetchCjkFont(400),
-  fetchCjkFont(700),
-];
+const fontRegular = readFileSync(join(geistFontDir, "Geist-Regular.ttf"));
+const fontBold = readFileSync(join(geistFontDir, "Geist-Bold.ttf"));
+const cjkRegular = readFileSync(join(cjkFontDir, "NotoSansTC-Regular.ttf"));
+const cjkBold = readFileSync(join(cjkFontDir, "NotoSansTC-Bold.ttf"));
 
 interface OgImageOptions {
   title: string;
@@ -51,11 +25,6 @@ export async function renderOgImage({
   description,
   category,
 }: OgImageOptions): Promise<Buffer> {
-  const [cjkRegular, cjkBold] = await Promise.all([
-    cjkRegularPromise,
-    cjkBoldPromise,
-  ]);
-
   const svg = await satori(
     {
       type: "div",
@@ -163,26 +132,18 @@ export async function renderOgImage({
       fonts: [
         { name: "Geist", data: fontRegular, weight: 400, style: "normal" },
         { name: "Geist", data: fontBold, weight: 700, style: "normal" },
-        ...(cjkRegular
-          ? [
-              {
-                name: "NotoTC",
-                data: cjkRegular,
-                weight: 400 as const,
-                style: "normal" as const,
-              },
-            ]
-          : []),
-        ...(cjkBold
-          ? [
-              {
-                name: "NotoTC",
-                data: cjkBold,
-                weight: 700 as const,
-                style: "normal" as const,
-              },
-            ]
-          : []),
+        {
+          name: "NotoTC",
+          data: cjkRegular,
+          weight: 400,
+          style: "normal",
+        },
+        {
+          name: "NotoTC",
+          data: cjkBold,
+          weight: 700,
+          style: "normal",
+        },
       ],
     },
   );
