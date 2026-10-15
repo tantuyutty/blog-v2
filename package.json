@@ -17,7 +17,9 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "prettier --write .",
-    "fmt:check": "prettier --check ."
+    "fmt:check": "prettier --check .",
+    "precommit": "lint-staged",
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
@@ -60,7 +62,12 @@
     "three": "^0.186.1",
     "typescript": "^7.0.2"
   },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown"
+  },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "oxlint": "^1.85.0",
     "prettier": "^3.9.9",
     "prettier-plugin-astro": "^1.1.0",

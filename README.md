@@ -48,13 +48,18 @@ All commands are run from the root of the project, from a terminal:
 
 | Command                | Action                                           |
 | :--------------------- | :----------------------------------------------- |
-| `pnpm install`         | Installs dependencies                            |
+| `pnpm install`         | Installs dependencies and Git hooks              |
 | `pnpm dev`             | Starts local dev server at `localhost:4321`      |
 | `pnpm build`           | Build your production site to `./dist/`          |
 | `pnpm preview`         | Preview your build locally, before deploying     |
 | `pnpm deploy`          | Build and deploy the site to Cloudflare Workers  |
 | `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `pnpm astro -- --help` | Get help using the Astro CLI                     |
+| `pnpm fmt`             | Formats the repository with Prettier             |
+| `pnpm fmt:check`       | Checks repository formatting                     |
+
+Husky runs `lint-staged` before every commit. Staged files supported by Prettier are
+formatted and re-staged automatically; unsupported files are left unchanged.
 
 ## 👀 Want to learn more?
 
