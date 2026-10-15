@@ -1,18 +1,15 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
 @import "@fontsource-variable/noto-serif-tc";
-@import "@fontsource-variable/merriweather";
 
 :root {
-  --font-merriweather: "Merriweather Variable", serif;
   --font-noto-serif: "Noto Serif TC Variable", serif;
   --font-geist-mono: "Geist Mono Variable", monospace;
 }
 
 .typeset-docs {
-  --typeset-font-body: "Merriweather Variable", "Noto Serif TC Variable", serif;
-  --typeset-font-heading:
-    "Merriweather Variable", "Noto Serif TC Variable", serif;
+  --typeset-font-body: "Noto Serif TC Variable", serif;
+  --typeset-font-heading: "Noto Serif TC Variable", serif;
   --typeset-font-mono: var(--font-geist-mono);
   --typeset-size: 18px;
   --typeset-leading: 1.75;
