@@ -41,6 +41,9 @@ importers:
       '@fontsource-variable/noto-serif-tc':
         specifier: ^5.3.0
         version: 5.3.0
+      '@fontsource/lora':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@inquirer/prompts':
         specifier: ^8.7.2
         version: 8.7.2(@types/node@24.13.6)
@@ -704,6 +707,9 @@ packages:
 
   '@fontsource-variable/noto-serif-tc@5.3.0':
     resolution: {integrity: sha512-V2teMMI26OmWNJd1d2o7J1DdsnMkyo/wwBoEnME3Qk6FDJ9KuTqpMuaeI3a/Sj3h0iAtmp2gKcg8phRdm4CyAw==}
+
+  '@fontsource/lora@5.3.0':
+    resolution: {integrity: sha512-OK1g1z01rHVPqO5aw/FOIoDqc46KKYZdgL3NOLkxLWDk6QhDHhdr/h2BV1cke6gTvR1tzpDfdKyUkGsC+sQLeQ==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -4916,6 +4922,8 @@ snapshots:
   '@fontsource-variable/geist@5.3.0': {}
 
   '@fontsource-variable/noto-serif-tc@5.3.0': {}
+
+  '@fontsource/lora@5.3.0': {}
 
   '@img/colour@1.1.0': {}
 

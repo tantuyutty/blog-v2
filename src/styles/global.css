@@ -119,7 +119,7 @@
 @theme inline {
   --font-sans: var(--font-geist);
   --font-mono: var(--font-geist-mono);
-  --font-serif: "Noto Serif TC", serif;
+  --font-serif: "Lora", "Noto Serif TC", serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -202,7 +202,7 @@
   .prose h6 {
     margin: 0 0 0.5rem 0;
     line-height: 1.2;
-    font-family: "Noto Serif TC", serif;
+    font-family: "Lora", "Noto Serif TC", serif;
   }
 
   .prose h1 {
