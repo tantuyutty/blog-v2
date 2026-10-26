@@ -265,11 +265,18 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
       );
       this.dialog?.addEventListener("click", this.onBackdropClick, { signal });
       this.dialog?.addEventListener("close", this.onClose, { signal });
-      document.addEventListener("keydown", this.onDocumentKeydown, { signal });
       document.addEventListener("themechange", this.syncThemeAction, {
         signal,
       });
+      window.addEventListener("resize", this.syncViewport, { signal });
+      window.visualViewport?.addEventListener("resize", this.syncViewport, {
+        signal,
+      });
+      window.visualViewport?.addEventListener("scroll", this.syncViewport, {
+        signal,
+      });
 
+      this.syncViewport();
       this.syncThemeAction();
     }
 
@@ -279,6 +286,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
 
     private open = () => {
       if (!this.dialog || !this.input || this.dialog.open) return;
+      this.syncViewport();
 
       this.input.value = "";
       this.trigger?.setAttribute("aria-expanded", "true");
@@ -305,6 +313,18 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
 
     private onBackdropClick = (event: MouseEvent) => {
       if (event.target === this.dialog) this.close();
+    };
+
+    private syncViewport = () => {
+      const viewport = window.visualViewport;
+      const height = viewport?.height ?? window.innerHeight;
+      const offsetTop = viewport?.offsetTop ?? 0;
+
+      this.dialog?.style.setProperty("--search-viewport-height", `${height}px`);
+      this.dialog?.style.setProperty(
+        "--search-viewport-offset-top",
+        `${offsetTop}px`,
+      );
     };
 
     private onDocumentKeydown = (event: KeyboardEvent) => {
@@ -538,6 +558,8 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
   }
 
   global-search dialog {
+    --search-viewport-height: 100dvh;
+    --search-viewport-offset-top: 0px;
     width: min(42rem, calc(100vw - 2rem));
     max-width: none;
     max-height: min(38rem, calc(100dvh - 4rem));
@@ -601,7 +623,8 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
   }
 
   .global-search-scroll-area {
-    min-height: 8rem;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 0.5rem;
@@ -744,12 +767,12 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
   @media (max-width: 40rem) {
     global-search dialog {
       width: calc(100vw - 1rem);
-      max-height: calc(100dvh - 1.5rem);
-      margin-top: 0.75rem;
+      max-height: calc(var(--search-viewport-height) - 1rem);
+      margin: calc(var(--search-viewport-offset-top) + 0.5rem) auto 0;
     }
 
     .global-search-panel {
-      max-height: calc(100dvh - 1.5rem);
+      max-height: calc(var(--search-viewport-height) - 1rem);
       border-radius: calc(var(--radius) + 0.25rem);
     }
 
