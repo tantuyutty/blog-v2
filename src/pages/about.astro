@@ -10,49 +10,14 @@ import infpIllustration from "@/assets/INFP.svg";
 import pixel_7 from "@/assets/Google_Pixel_7_back_(Lemongrass).svg";
 import pixel_11_pro from "@/assets/Pixel_11_Pro_(Fog,_back).svg";
 import valorantIcon from "@/assets/valorant-icon.svg";
-import slideGitForensics from "@/assets/slides/20260423-git-and-forensics.png";
-import slideLinux101 from "@/assets/slides/20250925-linux.png";
-import slideUnUsefulTool from "@/assets/slides/20260430-un-useful-tool.png";
 import { SITE_TITLE } from "@/consts";
 import Layout from "@/layouts/Layout.astro";
-import ExternalLink from "@/components/about/ExternalLink.astro";
 import InlineIcon from "@/components/about/InlineIcon.astro";
-
-type Slide = {
-  title: string;
-  date: string;
-  cover: ImageMetadata;
-  href: string;
-};
-
-const slides: Slide[] = [
-  {
-    title: "最無／有用的工具",
-    date: "2026.04.30",
-    cover: slideUnUsefulTool,
-    href: "https://url.ttymayor.com/un-useful-tool",
-  },
-  {
-    title: "Git & Forensics",
-    date: "2026.04.23",
-    cover: slideGitForensics,
-    href: "https://url.ttymayor.com/git-forensics",
-  },
-  {
-    title: "Linux — 你應該要認識的企鵝",
-    date: "2025.09.25",
-    cover: slideLinux101,
-    href: "https://url.ttymayor.com/20250925-linux",
-  },
-];
-
-const ai_agents: string[] = [
-  "omp (current)",
-  "Codex (current)",
-  "OpenCode (rare)",
-  "Gemini CLI (not Antigravity CLI)",
-  "Claude Code",
-];
+import ExternalLink from "@/components/about/ExternalLink.astro";
+import ExperienceSection from "@/components/about/ExperienceSection.astro";
+import SlidesList from "@/components/about/SlidesList.astro";
+import { slides } from "@/data/slides";
+import { experienceItems } from "@/data/experience";
 ---
 
 <Layout
@@ -198,27 +163,11 @@ const ai_agents: string[] = [
 
       <h2 id="development">Development</h2>
       <p>
-        現在沒在寫 Code，應該說寫程式這件事情已經沒那麼重要，現在 AI 寫 Code
-        的品質都已經可能是人都追不上的程度了。但我的意思並不是不再學習寫
-        Code，而是看你的目的，如果真的要當飯吃，在我看來還是得學習基礎概念，例如：判斷、迴圈、狀態等等，再到物件導向、還有很多架構之類的抽象概念；如果是要做自己的產品，那學會如何使用
-        AI
-        可能更重要。當然我也給不了多肯定的建議，畢竟我還沒有真的能混飯吃，也更不是資深工程師，我也不是專業顧問。
+        熱衷於開發、體驗各種開發工具，目前喜歡網頁開發，接觸過
+        Astro、Next.js、Vue.js
+        等框架，喜歡追隨新技術或新工具的使用。若你也有百寶袋，或許可以跟我分享，我也很樂於嘗試新事物。
       </p>
-      <p>
-        我很喜歡開發也很樂於使用
-        AI，如果你也有興趣，可以跟我討論或分享，目前使用過的 AI Agents：
-        {ai_agents.map((agent, index) => (
-          <>
-            <code>{agent}</code>
-            {index < ai_agents.length - 2
-              ? "、"
-              : index === ai_agents.length - 2
-                ? " 與 "
-                : ""}
-          </>
-        ))}
-        。
-      </p>
+      <p>我也樂於使用 AI，如果你也有興趣，可以跟我討論或分享 :D</p>
 
       <h2 id="music">Music</h2>
       <p>
@@ -308,39 +257,7 @@ const ai_agents: string[] = [
         <InlineIcon src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/canva/canva-original.svg" />{" "}
         Canva。
       </p>
-      <ul class="not-typeset my-6 flex flex-col gap-4" data-not-typeset>
-        {slides.map((slide) => (
-          <li>
-            <a
-              href={slide.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="group bg-card/40 hover:bg-card flex items-center gap-4 rounded-2xl p-3 transition-colors"
-            >
-              <Image
-                src={slide.cover}
-                alt=""
-                width={112}
-                class="aspect-video w-24 shrink-0 rounded-lg object-cover sm:w-28"
-              />
-              <span class="min-w-0 flex-1">
-                <span class="text-foreground block truncate text-sm font-medium sm:text-base">
-                  {slide.title}
-                </span>
-                <span class="text-muted-foreground block text-xs">
-                  {slide.date}
-                </span>
-              </span>
-              <span
-                class="text-muted-foreground group-hover:text-foreground pr-1 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              >
-                ↗
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <SlidesList slides={slides} />
 
       <p>
         接任教學職務是希望自己成長，同時也能夠訓練表達能力。高中時，有很多上台報告或主持不好的經驗，所以很希望能夠突破自己。
@@ -358,6 +275,7 @@ const ai_agents: string[] = [
         </a>
         互相。
       </p>
+      <ExperienceSection items={experienceItems} />
     </div>
   </main>
 </Layout>

@@ -1,0 +1,186 @@
+---
+import {
+  experienceCategories,
+  type ExperienceCategory,
+  type ExperienceItem,
+} from "@/data/experience";
+
+interface Props {
+  items: readonly ExperienceItem[];
+}
+
+const { items } = Astro.props;
+const categoryOrder = [
+  "activity",
+  "competition",
+] satisfies readonly ExperienceCategory[];
+const groups = categoryOrder
+  .map((category) => ({
+    category,
+    label: experienceCategories[category],
+    items: items.filter((item) => item.category === category),
+  }))
+  .filter((group) => group.items.length > 0);
+---
+
+{groups.length > 0 && (
+  <section aria-labelledby="experience">
+    <h2 id="experience">經歷</h2>
+    <div
+      class="experience-board not-typeset"
+      data-not-typeset
+      aria-label="經歷分類"
+    >
+      {groups.map((group) => (
+        <section
+          class="experience-track"
+          data-category={group.category}
+          aria-labelledby={`experience-${group.category}`}
+        >
+          <header class="track-header">
+            <h3 id={`experience-${group.category}`}>{group.label}</h3>
+          </header>
+
+          <ul class="track-list">
+            {group.items.map((item) => (
+              <li class="experience-entry bg-card/40 hover:bg-card rounded-2xl p-3 transition-colors">
+                <time>{item.period}</time>
+
+                <div>
+                  {item.href ? (
+                    <a
+                      class="experience-name experience-link"
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${item.name}（在新分頁開啟）`}
+                    >
+                      {item.name}
+                    </a>
+                  ) : (
+                    <p class="experience-name">{item.name}</p>
+                  )}
+                  <p class="experience-description">{item.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .experience-board {
+    display: grid;
+    gap: 2rem;
+    margin-block: 1.5rem 2.75rem;
+    text-align: left;
+  }
+
+  .experience-track {
+    --track-color: var(--primary);
+    min-width: 0;
+  }
+
+  .experience-track[data-category="competition"] {
+    --track-color: var(--primary);
+  }
+
+  .track-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block-end: 0.75rem;
+    border-block-end: 1px solid
+      color-mix(in oklab, var(--track-color) 42%, var(--border));
+  }
+
+  .track-mark {
+    width: 0.25rem;
+    height: 1.5rem;
+    flex: none;
+    border-radius: 999px;
+    background: var(--track-color);
+  }
+
+  .track-header h3 {
+    margin: 0;
+    color: var(--foreground);
+    font-family: var(--font-noto-serif);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .experience-entry {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .experience-entry time {
+    padding-block-start: 0.2rem;
+    color: var(--track-color);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    line-height: 1.5;
+  }
+
+  .experience-name,
+  .experience-description {
+    margin: 0;
+  }
+
+  .experience-name {
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .experience-link {
+    display: block;
+    width: fit-content;
+    text-decoration-line: underline;
+    text-decoration-style: dashed;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in oklab, currentColor 45%, transparent);
+    text-underline-offset: 0.2em;
+  }
+
+  .experience-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .experience-link:focus-visible {
+    border-radius: 0.125rem;
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .experience-description {
+    margin-block-start: 0.2rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 48rem) {
+    .experience-board {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(2.5rem, 6vw, 3rem);
+    }
+  }
+</style>
