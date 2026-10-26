@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { toggleTheme } from "@/lib/theme";
 
 /**
  * A tiny Three.js pull-cord (drawn as a line) fixed to the top-right corner.
@@ -134,18 +135,6 @@ export default function PullCordLamp() {
       targetOffsetX = Math.max(
         -MAX_OFFSET_X,
         Math.min(MAX_OFFSET_X, dragStartOffsetX + dx),
-      );
-    }
-
-    function toggleTheme() {
-      const current = localStorage.getItem("theme") || "dark";
-      const next = current === "dark" ? "light" : "dark";
-      localStorage.setItem("theme", next);
-      document.documentElement.classList[next === "dark" ? "add" : "remove"](
-        "dark",
-      );
-      document.dispatchEvent(
-        new CustomEvent("themechange", { detail: { theme: next } }),
       );
     }
 

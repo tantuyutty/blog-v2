@@ -8,12 +8,17 @@ pnpm create astro@latest -- --template blog
 
 Features:
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+- Astro content collections for Markdown and MDX articles and jottings
+- Static Open Graph images, sitemap, RSS feed, and canonical metadata
+- Persistent light and dark themes
+- Global page and content search with keyboard navigation
+
+## Global search
+
+Use the search control in the site header or press `Ctrl+K` / `⌘K`. The search
+dialog can navigate to pages, articles, and jottings or switch the active theme.
+Its static index is generated at `/search-index.json` from the content
+collections and `src/data/search-pages.ts`.
 
 ## 🚀 Project Structure
 

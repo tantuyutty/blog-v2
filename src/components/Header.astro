@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import AvatarImage from "@/assets/avatar.webp";
 import { SITE_TITLE } from "@/consts";
 import ModeToggle from "@/components/ModeToggle.astro";
+import GlobalSearch from "@/components/GlobalSearch.astro";
 import { BookOpenText, Menu, PenTool, User } from "@lucide/astro";
 import { cn } from "@/lib/utils";
 import Drawer from "@/components/ui/Drawer.astro";
@@ -67,44 +68,47 @@ const isBlogPost = /^blog\/.+/.test(pathname);
         );
       })}
     </div>
-    <div class="flex flex-row items-center justify-around md:hidden">
-      <ModeToggle />
-      <Drawer id="settings" title="目錄" description="網站目錄">
-        <span
-          slot="trigger"
-          class="hover:text-foreground/80 p-2 transition-all"
-        >
-          <Menu class="size-5" />
-        </span>
+    <div class="flex flex-row items-center justify-around gap-1">
+      <GlobalSearch />
+      <div class="flex flex-row items-center md:hidden">
+        <ModeToggle />
+        <Drawer id="settings" title="目錄" description="網站目錄">
+          <span
+            slot="trigger"
+            class="hover:text-foreground/80 p-2 transition-all"
+          >
+            <Menu class="size-5" />
+          </span>
 
-        <div id="drawer-content">
-          <ul class="m-0 flex list-none flex-col gap-1">
-            {navItems.map(({ href, label, Icon }) => {
-              const isActive = pathname.startsWith(href.replace("/", ""));
+          <div id="drawer-content">
+            <ul class="m-0 flex list-none flex-col gap-1">
+              {navItems.map(({ href, label, Icon }) => {
+                const isActive = pathname.startsWith(href.replace("/", ""));
 
-              return (
-                <li>
-                  <a
-                    href={href}
-                    data-nav-item
-                    data-active={isActive ? "true" : undefined}
-                    class:list={[
-                      "flex flex-row items-center justify-start gap-2 rounded-lg whitespace-nowrap no-underline transition-all",
-                      "mx-2 h-fit p-2",
-                      isActive
-                        ? "text-foreground dark:text-foreground bg-accent/10 dark:bg-accent/20"
-                        : "text-foreground/60 md:text-foreground/80 hover:text-foreground",
-                    ]}
-                  >
-                    <Icon class="size-5" />
-                    <span class="text-sm">{label}</span>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </Drawer>
+                return (
+                  <li>
+                    <a
+                      href={href}
+                      data-nav-item
+                      data-active={isActive ? "true" : undefined}
+                      class:list={[
+                        "flex flex-row items-center justify-start gap-2 rounded-lg whitespace-nowrap no-underline transition-all",
+                        "mx-2 h-fit p-2",
+                        isActive
+                          ? "text-foreground dark:text-foreground bg-accent/10 dark:bg-accent/20"
+                          : "text-foreground/60 md:text-foreground/80 hover:text-foreground",
+                      ]}
+                    >
+                      <Icon class="size-5" />
+                      <span class="text-sm">{label}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </Drawer>
+      </div>
     </div>
   </nav>
 </header>

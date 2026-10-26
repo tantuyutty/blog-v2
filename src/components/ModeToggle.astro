@@ -22,6 +22,8 @@ import IconSwap from "@/components/IconSwap.astro";
 </theme-toggle>
 
 <script>
+  import { toggleTheme as toggleSiteTheme } from "@/lib/theme";
+
   class ThemeToggle extends HTMLElement {
     private button: HTMLButtonElement | null = null;
     private iconSwap: HTMLElement | null = null;
@@ -46,14 +48,7 @@ import IconSwap from "@/components/IconSwap.astro";
     }
 
     private toggleTheme = () => {
-      const isDark = document.documentElement.classList.contains("dark");
-      const theme = isDark ? "light" : "dark";
-
-      document.documentElement.classList.toggle("dark", theme === "dark");
-      localStorage.setItem("theme", theme);
-      document.dispatchEvent(
-        new CustomEvent("themechange", { detail: { theme } }),
-      );
+      toggleSiteTheme();
     };
 
     private syncTheme = () => {

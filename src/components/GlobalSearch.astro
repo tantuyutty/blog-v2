@@ -1,0 +1,766 @@
+---
+import { Moon, Search, Sun, X } from "@lucide/astro";
+---
+
+<global-search>
+  <button
+    type="button"
+    data-search-trigger
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    class="text-foreground/70 bg-card hover:text-foreground focus-visible:ring-ring/50 inline-flex h-9 items-center gap-2 rounded-full px-2 text-sm transition-colors outline-none focus-visible:ring-3 md:border/50 md:px-2.5"
+  >
+    <Search class="size-4" />
+    <span class="hidden lg:inline">搜尋</span>
+    <kbd
+      aria-hidden="true"
+      class="border-border border-b-2 bg-muted text-muted-foreground hidden rounded border px-1.5 py-1 font-sans text-[0.6875rem] leading-none lg:inline"
+    >
+      Ctrl K
+    </kbd>
+    <span class="sr-only">開啟全域搜尋</span>
+  </button>
+
+  <dialog
+    data-search-dialog
+    aria-labelledby="global-search-title"
+    aria-describedby="global-search-description"
+  >
+    <div class="global-search-panel">
+      <h2 id="global-search-title" class="sr-only">
+        全域搜尋
+      </h2>
+      <p id="global-search-description" class="sr-only">
+        搜尋網站頁面、文章與隨筆，或切換網站主題。
+      </p>
+
+      <div class="global-search-input-row">
+        <Search
+          aria-hidden="true"
+          class="text-muted-foreground size-5 shrink-0"
+        />
+        <input
+          type="search"
+          data-search-input
+          role="combobox"
+          aria-label="搜尋頁面、文章或動作"
+          aria-controls="global-search-results"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          autocomplete="off"
+          placeholder="搜尋頁面、文章或動作…"
+        />
+        <button
+          type="button"
+          data-search-close
+          aria-label="關閉搜尋"
+          class="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 inline-flex size-8 shrink-0 items-center justify-center rounded-md outline-none focus-visible:ring-3"
+        >
+          <X class="size-4" />
+        </button>
+      </div>
+
+      <p
+        class="sr-only"
+        role="status"
+        aria-live="polite"
+        data-search-status
+      ></p>
+
+      <div class="global-search-scroll-area">
+        <div id="global-search-results" role="listbox" aria-label="搜尋結果">
+          <div data-document-results></div>
+          <section
+            data-theme-section
+            role="group"
+            aria-labelledby="global-search-actions-label"
+            class="global-search-group"
+          >
+            <h3
+              id="global-search-actions-label"
+              class="global-search-group-label"
+            >
+              快速動作
+            </h3>
+            <button
+              type="button"
+              id="global-search-theme-option"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+              data-search-option
+              data-theme-action
+              class="global-search-result"
+            >
+              <span class="global-search-result-icon" aria-hidden="true">
+                <Sun data-light-theme-icon class="size-4" />
+                <Moon data-dark-theme-icon class="hidden size-4" />
+              </span>
+              <span class="global-search-result-content">
+                <span
+                  class="global-search-result-title"
+                  data-theme-action-label
+                >
+                  切換主題
+                </span>
+                <span class="global-search-result-description">
+                  使用目前裝置儲存的顯示偏好
+                </span>
+              </span>
+              <span class="global-search-result-kind">動作</span>
+            </button>
+          </section>
+        </div>
+
+        <p data-search-loading class="global-search-message" hidden>
+          正在載入搜尋索引…
+        </p>
+        <p data-search-empty class="global-search-message" hidden>
+          找不到符合的頁面或文章。
+        </p>
+        <p data-search-error class="global-search-message" hidden>
+          搜尋索引載入失敗，請稍後再試。
+        </p>
+      </div>
+
+      <footer class="global-search-footer" aria-hidden="true">
+        <span>
+          <kbd>↑</kbd>
+          <kbd>↓</kbd> 選擇
+        </span>
+        <span>
+          <kbd>Enter</kbd> 開啟
+        </span>
+        <span>
+          <kbd>Esc</kbd> 關閉
+        </span>
+      </footer>
+    </div>
+  </dialog>
+</global-search>
+
+<script>
+  import {
+    normalizeSearchText,
+    prepareSearchDocuments,
+    searchDocuments,
+  } from "@/lib/search";
+  import { getTheme, toggleTheme } from "@/lib/theme";
+  import type {
+    PreparedSearchDocument,
+    SearchDocument,
+    SearchDocumentKind,
+  } from "@/types/search";
+
+  const SEARCH_LIMIT = 10;
+  const themeKeywords = normalizeSearchText(
+    "主題 切換 深色 暗色 淺色 亮色 dark light theme",
+  );
+  const dateFormatter = new Intl.DateTimeFormat("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const groupLabels: Record<SearchDocumentKind, string> = {
+    page: "頁面",
+    post: "文章",
+    jotting: "隨筆",
+  };
+  const groupOrder: SearchDocumentKind[] = ["page", "post", "jotting"];
+
+  let documentPromise: Promise<SearchDocument[]> | undefined;
+
+  function loadSearchDocuments(): Promise<SearchDocument[]> {
+    documentPromise ??= fetch(`${import.meta.env.BASE_URL}search-index.json`)
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`Search index: ${response.status}`);
+        return (await response.json()) as SearchDocument[];
+      })
+      .catch((error: unknown) => {
+        documentPromise = undefined;
+        throw error;
+      });
+    return documentPromise;
+  }
+
+  class GlobalSearch extends HTMLElement {
+    private dialog: HTMLDialogElement | null = null;
+    private trigger: HTMLButtonElement | null = null;
+    private input: HTMLInputElement | null = null;
+    private closeButton: HTMLButtonElement | null = null;
+    private themeSection: HTMLElement | null = null;
+    private themeAction: HTMLButtonElement | null = null;
+    private themeLabel: HTMLElement | null = null;
+    private lightThemeIcon: HTMLElement | null = null;
+    private darkThemeIcon: HTMLElement | null = null;
+    private documentResults: HTMLElement | null = null;
+    private loadingMessage: HTMLElement | null = null;
+    private emptyMessage: HTMLElement | null = null;
+    private errorMessage: HTMLElement | null = null;
+    private status: HTMLElement | null = null;
+    private documents: SearchDocument[] = [];
+    private preparedDocuments: PreparedSearchDocument[] = [];
+    private activeIndex = -1;
+    private loadFailed = false;
+    private abortController: AbortController | null = null;
+
+    connectedCallback() {
+      this.abortController?.abort();
+      this.abortController = new AbortController();
+      const { signal } = this.abortController;
+
+      this.dialog = this.querySelector<HTMLDialogElement>(
+        "[data-search-dialog]",
+      );
+      this.trigger = this.querySelector<HTMLButtonElement>(
+        "[data-search-trigger]",
+      );
+      this.input = this.querySelector<HTMLInputElement>("[data-search-input]");
+      this.closeButton = this.querySelector<HTMLButtonElement>(
+        "[data-search-close]",
+      );
+      this.themeSection = this.querySelector<HTMLElement>(
+        "[data-theme-section]",
+      );
+      this.themeAction = this.querySelector<HTMLButtonElement>(
+        "[data-theme-action]",
+      );
+      this.themeLabel = this.querySelector<HTMLElement>(
+        "[data-theme-action-label]",
+      );
+      this.lightThemeIcon = this.querySelector<HTMLElement>(
+        "[data-light-theme-icon]",
+      );
+      this.darkThemeIcon = this.querySelector<HTMLElement>(
+        "[data-dark-theme-icon]",
+      );
+      this.documentResults = this.querySelector<HTMLElement>(
+        "[data-document-results]",
+      );
+      this.loadingMessage = this.querySelector<HTMLElement>(
+        "[data-search-loading]",
+      );
+      this.emptyMessage = this.querySelector<HTMLElement>(
+        "[data-search-empty]",
+      );
+      this.errorMessage = this.querySelector<HTMLElement>(
+        "[data-search-error]",
+      );
+      this.status = this.querySelector<HTMLElement>("[data-search-status]");
+
+      this.trigger?.addEventListener("click", this.open, { signal });
+      this.closeButton?.addEventListener("click", this.close, { signal });
+      this.input?.addEventListener("input", this.render, { signal });
+      this.input?.addEventListener("keydown", this.onInputKeydown, { signal });
+      this.themeAction?.addEventListener("click", this.runThemeAction, {
+        signal,
+      });
+      this.themeAction?.addEventListener(
+        "pointermove",
+        () => {
+          const options = this.getOptions();
+          this.setActiveIndex(options.indexOf(this.themeAction!));
+        },
+        { signal },
+      );
+      this.dialog?.addEventListener("click", this.onBackdropClick, { signal });
+      this.dialog?.addEventListener("close", this.onClose, { signal });
+      document.addEventListener("keydown", this.onDocumentKeydown, { signal });
+      document.addEventListener("themechange", this.syncThemeAction, {
+        signal,
+      });
+
+      this.syncThemeAction();
+    }
+
+    disconnectedCallback() {
+      this.abortController?.abort();
+    }
+
+    private open = () => {
+      if (!this.dialog || !this.input || this.dialog.open) return;
+
+      this.input.value = "";
+      this.trigger?.setAttribute("aria-expanded", "true");
+      this.input.setAttribute("aria-expanded", "true");
+      this.dialog.showModal();
+      this.syncThemeAction();
+      this.render();
+      requestAnimationFrame(() => this.input?.focus());
+
+      if (this.documents.length === 0) void this.fetchDocuments();
+    };
+
+    private close = () => {
+      this.dialog?.close();
+    };
+
+    private onClose = () => {
+      this.trigger?.setAttribute("aria-expanded", "false");
+      this.input?.setAttribute("aria-expanded", "false");
+      this.input?.removeAttribute("aria-activedescendant");
+      this.activeIndex = -1;
+      this.trigger?.focus();
+    };
+
+    private onBackdropClick = (event: MouseEvent) => {
+      if (event.target === this.dialog) this.close();
+    };
+
+    private onDocumentKeydown = (event: KeyboardEvent) => {
+      if (
+        !(event.metaKey || event.ctrlKey) ||
+        event.key.toLowerCase() !== "k"
+      ) {
+        return;
+      }
+      event.preventDefault();
+      if (this.dialog?.open) this.close();
+      else this.open();
+    };
+
+    private onInputKeydown = (event: KeyboardEvent) => {
+      if (event.isComposing) return;
+      const options = this.getOptions();
+      if (options.length === 0) return;
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        this.setActiveIndex((this.activeIndex + 1) % options.length);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        this.setActiveIndex(
+          (this.activeIndex - 1 + options.length) % options.length,
+        );
+      } else if (event.key === "Enter" && this.activeIndex >= 0) {
+        event.preventDefault();
+        options[this.activeIndex]?.click();
+      }
+    };
+
+    private fetchDocuments = async () => {
+      this.loadFailed = false;
+      this.setMessage(this.loadingMessage);
+
+      try {
+        this.documents = await loadSearchDocuments();
+        this.preparedDocuments = prepareSearchDocuments(this.documents);
+        if (this.dialog?.open) this.render();
+      } catch {
+        this.loadFailed = true;
+        if (this.dialog?.open) this.setMessage(this.errorMessage);
+      }
+    };
+
+    private render = () => {
+      if (!this.documentResults || !this.input) return;
+
+      const query = normalizeSearchText(this.input.value);
+      const terms = query.split(" ").filter(Boolean);
+      const showThemeAction = terms.every((term) =>
+        themeKeywords.includes(term),
+      );
+      if (this.themeSection) this.themeSection.hidden = !showThemeAction;
+
+      let results: SearchDocument[] = [];
+      if (this.documents.length > 0) {
+        results = query
+          ? searchDocuments(this.preparedDocuments, query, SEARCH_LIMIT)
+          : this.getDefaultDocuments();
+      }
+
+      this.renderDocumentGroups(results, query.length === 0);
+      const resultCount = results.length + (showThemeAction ? 1 : 0);
+
+      if (this.loadFailed) {
+        this.setMessage(this.errorMessage);
+      } else if (this.documents.length === 0) {
+        this.setMessage(this.loadingMessage);
+      } else if (resultCount === 0) {
+        this.setMessage(this.emptyMessage);
+      } else {
+        this.setMessage(null);
+      }
+
+      if (this.status) {
+        this.status.textContent =
+          resultCount > 0 ? `${resultCount} 個結果` : "沒有結果";
+      }
+      this.setActiveIndex(resultCount > 0 ? 0 : -1);
+    };
+
+    private getDefaultDocuments(): SearchDocument[] {
+      const pages = this.documents.filter(({ kind }) => kind === "page");
+      const recentPosts = this.documents
+        .filter(({ kind }) => kind === "post")
+        .sort((a, b) =>
+          (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""),
+        )
+        .slice(0, 5);
+      return [...pages, ...recentPosts];
+    }
+
+    private renderDocumentGroups(
+      documents: SearchDocument[],
+      showRecentLabel: boolean,
+    ) {
+      if (!this.documentResults) return;
+      this.documentResults.replaceChildren();
+
+      for (const kind of groupOrder) {
+        const groupedDocuments = documents.filter(
+          (document) => document.kind === kind,
+        );
+        if (groupedDocuments.length === 0) continue;
+
+        const section = document.createElement("section");
+        section.className = "global-search-group";
+        section.setAttribute("role", "group");
+
+        const label = document.createElement("h3");
+        const labelId = `global-search-${kind}-label`;
+        label.id = labelId;
+        label.className = "global-search-group-label";
+        label.textContent =
+          showRecentLabel && kind === "post" ? "最近文章" : groupLabels[kind];
+        section.setAttribute("aria-labelledby", labelId);
+        section.append(label);
+
+        for (const searchDocument of groupedDocuments) {
+          section.append(this.createResult(searchDocument));
+        }
+        this.documentResults.append(section);
+      }
+    }
+
+    private createResult(searchDocument: SearchDocument): HTMLAnchorElement {
+      const link = document.createElement("a");
+      link.id = `global-search-${searchDocument.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+      link.href = searchDocument.href;
+      link.role = "option";
+      link.tabIndex = -1;
+      link.dataset.searchOption = "";
+      link.setAttribute("aria-selected", "false");
+      link.className = "global-search-result";
+
+      const content = document.createElement("span");
+      content.className = "global-search-result-content";
+      const title = document.createElement("span");
+      title.className = "global-search-result-title";
+      title.textContent = searchDocument.title;
+      content.append(title);
+
+      if (searchDocument.description) {
+        const description = document.createElement("span");
+        description.className = "global-search-result-description";
+        description.textContent = searchDocument.description;
+        content.append(description);
+      }
+
+      const metadata = document.createElement("span");
+      metadata.className = "global-search-result-metadata";
+      metadata.textContent = groupLabels[searchDocument.kind];
+      if (searchDocument.publishedAt) {
+        const date = new Date(searchDocument.publishedAt);
+        if (!Number.isNaN(date.valueOf())) {
+          metadata.textContent += ` · ${dateFormatter.format(date)}`;
+        }
+      }
+
+      link.append(content, metadata);
+      link.addEventListener("pointermove", () => {
+        this.setActiveIndex(this.getOptions().indexOf(link));
+      });
+      link.addEventListener("click", this.close);
+      return link;
+    }
+
+    private getOptions(): HTMLElement[] {
+      return Array.from(
+        this.querySelectorAll<HTMLElement>("[data-search-option]"),
+      ).filter((option) => !option.closest("[hidden]"));
+    }
+
+    private setActiveIndex(index: number) {
+      const options = this.getOptions();
+      this.activeIndex = options.length === 0 ? -1 : Math.max(0, index);
+
+      options.forEach((option, optionIndex) => {
+        const selected = optionIndex === this.activeIndex;
+        option.dataset.selected = selected ? "true" : "false";
+        option.setAttribute("aria-selected", String(selected));
+      });
+
+      const activeOption = options[this.activeIndex];
+      if (activeOption && this.input) {
+        this.input.setAttribute("aria-activedescendant", activeOption.id);
+        activeOption.scrollIntoView({ block: "nearest" });
+      } else {
+        this.input?.removeAttribute("aria-activedescendant");
+      }
+    }
+
+    private setMessage(message: HTMLElement | null) {
+      for (const element of [
+        this.loadingMessage,
+        this.emptyMessage,
+        this.errorMessage,
+      ]) {
+        if (element) element.hidden = element !== message;
+      }
+    }
+
+    private runThemeAction = () => {
+      toggleTheme();
+      this.close();
+    };
+
+    private syncThemeAction = () => {
+      const isDark = getTheme() === "dark";
+      if (this.themeLabel) {
+        this.themeLabel.textContent = isDark
+          ? "切換至淺色模式"
+          : "切換至深色模式";
+      }
+      this.lightThemeIcon?.classList.toggle("hidden", !isDark);
+      this.darkThemeIcon?.classList.toggle("hidden", isDark);
+    };
+  }
+
+  if (!customElements.get("global-search")) {
+    customElements.define("global-search", GlobalSearch);
+  }
+</script>
+
+<style is:global>
+  global-search {
+    display: inline-flex;
+  }
+
+  global-search dialog {
+    width: min(42rem, calc(100vw - 2rem));
+    max-width: none;
+    max-height: min(38rem, calc(100dvh - 4rem));
+    margin: 10dvh auto auto;
+    padding: 0;
+    color: var(--foreground);
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+
+  global-search dialog::backdrop {
+    background: color-mix(in oklab, black 50%, transparent);
+    backdrop-filter: blur(3px);
+  }
+
+  global-search dialog[open] {
+    animation: global-search-enter 140ms ease-out;
+  }
+
+  .global-search-panel {
+    display: flex;
+    max-height: min(38rem, calc(100dvh - 4rem));
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 0.5rem);
+    background: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow:
+      0 24px 60px rgb(0 0 0 / 0.22),
+      0 4px 16px rgb(0 0 0 / 0.12);
+  }
+
+  .global-search-input-row {
+    display: flex;
+    min-height: 3.75rem;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .global-search-input-row input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  .global-search-input-row input::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .global-search-input-row input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .global-search-scroll-area {
+    min-height: 8rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.5rem;
+    scrollbar-width: none;
+  }
+
+  .global-search-group + .global-search-group {
+    margin-top: 0.35rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .global-search-group-label {
+    margin: 0;
+    padding: 0.45rem 0.625rem 0.3rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .global-search-result {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  button.global-search-result {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    font: inherit;
+  }
+
+  .global-search-result[data-selected="true"] {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  .global-search-result:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+
+  .global-search-result-icon {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+
+  .global-search-result-content {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .global-search-result-title,
+  .global-search-result-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .global-search-result-title {
+    font-family: "Lora", "Noto Serif TC", serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .global-search-result-description,
+  .global-search-result-metadata,
+  .global-search-result-kind {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+  }
+
+  .global-search-result-metadata,
+  .global-search-result-kind {
+    white-space: nowrap;
+  }
+
+  .global-search-message {
+    margin: 0;
+    padding: 2.5rem 1rem;
+    color: var(--muted-foreground);
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  .global-search-footer {
+    display: flex;
+    min-height: 2.5rem;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 0 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+  }
+
+  .global-search-footer span,
+  .global-search-footer kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .global-search-footer kbd {
+    min-width: 1.25rem;
+    justify-content: center;
+    padding: 0.1rem 0.25rem;
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    border-radius: 0.25rem;
+    background: var(--muted);
+    color: var(--foreground);
+    font-family: inherit;
+    line-height: 1;
+  }
+
+  @keyframes global-search-enter {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem) scale(0.985);
+    }
+  }
+
+  @media (max-width: 40rem) {
+    global-search dialog {
+      width: calc(100vw - 1rem);
+      max-height: calc(100dvh - 1.5rem);
+      margin-top: 0.75rem;
+    }
+
+    .global-search-panel {
+      max-height: calc(100dvh - 1.5rem);
+      border-radius: calc(var(--radius) + 0.25rem);
+    }
+
+    .global-search-footer {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    global-search dialog[open] {
+      animation: none;
+    }
+  }
+</style>
