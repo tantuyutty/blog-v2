@@ -55,10 +55,10 @@ const isBlogPost = /^blog\/.+/.test(pathname);
             data-nav-item
             data-active={isActive ? "true" : undefined}
             class:list={[
-              "inline-flex flex-row items-center justify-center gap-1 rounded-full whitespace-nowrap no-underline transition-all",
+              "relative inline-flex flex-row items-center justify-center gap-1 rounded-full whitespace-nowrap no-underline transition-all",
               "h-fit w-fit px-3 py-2",
               isActive
-                ? "text-foreground dark:text-foreground"
+                ? "text-foreground after:absolute after:-bottom-1 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-foreground dark:text-foreground"
                 : "text-foreground/60 md:text-foreground/80 hover:text-foreground",
             ]}
           >
