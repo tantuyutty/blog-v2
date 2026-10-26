@@ -16,9 +16,10 @@ Features:
 ## Global search
 
 Use the search control in the site header or press `Ctrl+K` / `⌘K`. The search
-dialog can navigate to pages, articles, and jottings or switch the active theme.
-Its static index is generated at `/search-index.json` from the content
-collections and `src/data/search-pages.ts`.
+dialog can navigate to pages, articles, jottings, and related links (GitHub,
+email, and RSS), or switch the active theme. Its static index is generated at
+`/search-index.json` from the content collections, `src/data/search-pages.ts`,
+and `src/data/social-links.ts`.
 
 ## 🚀 Project Structure
 

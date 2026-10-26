@@ -58,6 +58,7 @@
     "remark-math": "^6.0.0",
     "satori": "^0.33.5",
     "sharp": "^0.35.4",
+    "simple-icons": "^16.36.0",
     "tailwindcss": "^4.3.3",
     "tegaki": "^0.22.2",
     "three": "^0.186.1",

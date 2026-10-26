@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import { searchPages } from "@/data/search-pages";
+import { socialLinks } from "@/data/social-links";
 import type { SearchDocument } from "@/types/search";
 
 function markdownToPlainText(markdown: string): string {
@@ -45,6 +46,7 @@ export async function getSearchDocuments(): Promise<SearchDocument[]> {
         kind: "post",
         title: post.data.title,
         href: `/blog/${post.id}`,
+        icon: "file",
         description: post.data.description ?? makeExcerpt(body),
         publishedAt: post.data.pubDate,
         tags: post.data.tags,
@@ -69,5 +71,20 @@ export async function getSearchDocuments(): Promise<SearchDocument[]> {
       };
     });
 
-  return [...searchPages, ...postDocuments, ...jottingDocuments];
+  const linkDocuments: SearchDocument[] = socialLinks.map((link) => ({
+    id: `link-${link.id}`,
+    kind: "link",
+    title: link.label,
+    href: link.href,
+    description: link.description,
+    iconPath: link.icon.path,
+    searchText: link.searchText,
+  }));
+
+  return [
+    ...searchPages,
+    ...postDocuments,
+    ...jottingDocuments,
+    ...linkDocuments,
+  ];
 }

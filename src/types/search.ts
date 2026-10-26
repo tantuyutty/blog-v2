@@ -1,4 +1,6 @@
-export type SearchDocumentKind = "page" | "post" | "jotting";
+export type SearchDocumentKind = "page" | "post" | "jotting" | "link";
+export type SearchDocumentIcon =
+  "house" | "pen-tool" | "book-open-text" | "user" | "file";
 
 export interface SearchDocument {
   id: string;
@@ -6,6 +8,8 @@ export interface SearchDocument {
   title: string;
   href: string;
   description?: string;
+  icon?: SearchDocumentIcon;
+  iconPath?: string;
   publishedAt?: string;
   tags?: string[];
   searchText: string;

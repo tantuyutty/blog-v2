@@ -1,5 +1,15 @@
 ---
-import { Moon, Search, Sun, X } from "@lucide/astro";
+import {
+  BookOpenText,
+  File,
+  House,
+  Moon,
+  PenTool,
+  Search,
+  Sun,
+  User,
+  X,
+} from "@lucide/astro";
 ---
 
 <global-search>
@@ -8,7 +18,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
     data-search-trigger
     aria-haspopup="dialog"
     aria-expanded="false"
-    class="text-foreground/70 hover:text-foreground focus-visible:ring-ring/50 inline-flex h-9 items-center gap-2 rounded-full px-2 text-sm transition-colors outline-none focus-visible:ring-3 md:border/50 md:px-2.5"
+    class="text-foreground md:text-foreground/80 hover:text-foreground focus-visible:ring-ring/50 inline-flex h-9 items-center gap-2 rounded-full px-2 text-sm transition-colors outline-none focus-visible:ring-3 md:border/50 md:px-2.5"
   >
     <Search class="size-4" />
     <span class="hidden lg:inline">搜尋</span>
@@ -21,6 +31,22 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
     <span class="sr-only">開啟全域搜尋</span>
   </button>
 
+  <template data-search-icon="house">
+    <House aria-hidden="true" />
+  </template>
+  <template data-search-icon="pen-tool">
+    <PenTool aria-hidden="true" />
+  </template>
+  <template data-search-icon="book-open-text">
+    <BookOpenText aria-hidden="true" />
+  </template>
+  <template data-search-icon="user">
+    <User aria-hidden="true" />
+  </template>
+  <template data-search-icon="file">
+    <File aria-hidden="true" />
+  </template>
+
   <dialog
     data-search-dialog
     aria-labelledby="global-search-title"
@@ -31,7 +57,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
         全域搜尋
       </h2>
       <p id="global-search-description" class="sr-only">
-        搜尋網站頁面、文章與隨筆，或切換網站主題。
+        搜尋網站頁面、文章、隨筆與相關連結，或切換網站主題。
       </p>
 
       <div class="global-search-input-row">
@@ -43,12 +69,12 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
           type="search"
           data-search-input
           role="combobox"
-          aria-label="搜尋頁面、文章或動作"
+          aria-label="搜尋頁面、文章、相關連結或動作"
           aria-controls="global-search-results"
           aria-autocomplete="list"
           aria-expanded="false"
           autocomplete="off"
-          placeholder="搜尋頁面、文章或動作…"
+          placeholder="應該都搜得到"
         />
         <button
           type="button"
@@ -150,6 +176,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
     PreparedSearchDocument,
     SearchDocument,
     SearchDocumentKind,
+    SearchDocumentIcon,
   } from "@/types/search";
 
   const SEARCH_LIMIT = 10;
@@ -165,8 +192,9 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
     page: "頁面",
     post: "文章",
     jotting: "隨筆",
+    link: "相關連結",
   };
-  const groupOrder: SearchDocumentKind[] = ["page", "post", "jotting"];
+  const groupOrder: SearchDocumentKind[] = ["page", "post", "jotting", "link"];
 
   let documentPromise: Promise<SearchDocument[]> | undefined;
 
@@ -193,6 +221,9 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
     private themeLabel: HTMLElement | null = null;
     private lightThemeIcon: HTMLElement | null = null;
     private darkThemeIcon: HTMLElement | null = null;
+    private iconTemplates: Partial<
+      Record<SearchDocumentIcon, HTMLTemplateElement>
+    > = {};
     private documentResults: HTMLElement | null = null;
     private loadingMessage: HTMLElement | null = null;
     private emptyMessage: HTMLElement | null = null;
@@ -234,6 +265,14 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
       this.darkThemeIcon = this.querySelector<HTMLElement>(
         "[data-dark-theme-icon]",
       );
+      this.iconTemplates = {};
+      for (const template of this.querySelectorAll<HTMLTemplateElement>(
+        "[data-search-icon]",
+      )) {
+        const icon = template.dataset.searchIcon as
+          SearchDocumentIcon | undefined;
+        if (icon) this.iconTemplates[icon] = template;
+      }
       this.documentResults = this.querySelector<HTMLElement>(
         "[data-document-results]",
       );
@@ -252,6 +291,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
       this.closeButton?.addEventListener("click", this.close, { signal });
       this.input?.addEventListener("input", this.render, { signal });
       this.input?.addEventListener("keydown", this.onInputKeydown, { signal });
+      document.addEventListener("keydown", this.onDocumentKeydown, { signal });
       this.themeAction?.addEventListener("click", this.runThemeAction, {
         signal,
       });
@@ -417,7 +457,8 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
           (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""),
         )
         .slice(0, 5);
-      return [...pages, ...recentPosts];
+      const links = this.documents.filter(({ kind }) => kind === "link");
+      return [...pages, ...recentPosts, ...links];
     }
 
     private renderDocumentGroups(
@@ -462,6 +503,44 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
       link.dataset.searchOption = "";
       link.setAttribute("aria-selected", "false");
       link.className = "global-search-result";
+      if (/^https?:\/\//.test(searchDocument.href)) {
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+      }
+
+      let icon: Element | null = null;
+      const iconTemplate = searchDocument.icon
+        ? this.iconTemplates[searchDocument.icon]
+        : undefined;
+      if (iconTemplate?.content.firstElementChild) {
+        icon = iconTemplate.content.firstElementChild.cloneNode(
+          true,
+        ) as Element;
+      } else if (searchDocument.iconPath) {
+        const brandIcon = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "svg",
+        );
+        brandIcon.setAttribute("viewBox", "0 0 24 24");
+        brandIcon.setAttribute("aria-hidden", "true");
+        brandIcon.classList.add("global-search-brand-icon");
+
+        const path = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path",
+        );
+        path.setAttribute("d", searchDocument.iconPath);
+        brandIcon.append(path);
+        icon = brandIcon;
+      }
+
+      let iconWrapper: HTMLSpanElement | undefined;
+      if (icon) {
+        iconWrapper = document.createElement("span");
+        iconWrapper.className = "global-search-result-icon";
+        iconWrapper.append(icon);
+        link.classList.add("global-search-result-with-icon");
+      }
 
       const content = document.createElement("span");
       content.className = "global-search-result-content";
@@ -487,6 +566,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
         }
       }
 
+      if (iconWrapper) link.append(iconWrapper);
       link.append(content, metadata);
       link.addEventListener("pointermove", () => {
         this.setActiveIndex(this.getOptions().indexOf(link));
@@ -660,6 +740,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
     text-decoration: none;
   }
 
+  .global-search-result-with-icon,
   button.global-search-result {
     grid-template-columns: auto minmax(0, 1fr) auto;
     font: inherit;
@@ -683,6 +764,15 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
     justify-content: center;
     border: 1px solid var(--border);
     border-radius: 999px;
+  }
+
+  .global-search-result-icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .global-search-brand-icon {
+    fill: currentColor;
   }
 
   .global-search-result-content {
@@ -715,6 +805,7 @@ import { Moon, Search, Sun, X } from "@lucide/astro";
   .global-search-result-metadata,
   .global-search-result-kind {
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .global-search-message {
