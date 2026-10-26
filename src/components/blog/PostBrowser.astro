@@ -1,5 +1,4 @@
 ---
-import Filter from "@/components/blog/Filter.astro";
 import PostList from "@/components/blog/PostList.astro";
 import { BLOG_PAGE_SIZE } from "@/lib/pagination";
 import type { BlogPost } from "@/types/blog";
@@ -44,7 +43,6 @@ const pageButtonClass =
   data-page-size={BLOG_PAGE_SIZE}
   data-initial-page={page}
 >
-  <Filter totalPosts={posts.length} />
   <PostList posts={posts} initialPage={page} pageSize={BLOG_PAGE_SIZE} />
   {totalPages > 1 && (
     <nav
@@ -246,11 +244,6 @@ const pageButtonClass =
     if (!root) return;
 
     const pageSize = Number(root.dataset.pageSize);
-    const searchInput =
-      root.querySelector<HTMLInputElement>("[data-post-search]");
-    const resultCount = root.querySelector<HTMLElement>(
-      "[data-post-result-count]",
-    );
     const pagination = root.querySelector<HTMLElement>(
       "[data-post-pagination]",
     );
@@ -259,19 +252,15 @@ const pageButtonClass =
     ).map((element) => ({
       element,
       separator: element.querySelector<HTMLElement>("[data-post-separator]"),
-      title: element.dataset.title ?? "",
-      tags: JSON.parse(element.dataset.tags ?? "[]") as string[],
-      category: element.dataset.category ?? "",
     }));
-    let filteredPosts = posts;
-    let page = getPageFromUrl(Math.max(1, Math.ceil(posts.length / pageSize)));
-    let searchTimer: number | undefined;
+    const pageCount = Math.max(1, Math.ceil(posts.length / pageSize));
+    let page = getPageFromUrl(pageCount);
 
     const pageButtonClass =
       "inline-flex size-9 shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4";
 
     function totalPages() {
-      return Math.max(1, Math.ceil(filteredPosts.length / pageSize));
+      return pageCount;
     }
 
     function updatePageInUrl(
@@ -379,11 +368,10 @@ const pageButtonClass =
     }
 
     function render() {
-      const total = totalPages();
-      page = Math.min(Math.max(1, page), total);
+      page = Math.min(Math.max(1, page), pageCount);
       const firstIndex = (page - 1) * pageSize;
       const visiblePosts = new Set(
-        filteredPosts.slice(firstIndex, firstIndex + pageSize),
+        posts.slice(firstIndex, firstIndex + pageSize),
       );
       let visibleIndex = 0;
 
@@ -395,8 +383,6 @@ const pageButtonClass =
         if (visible) visibleIndex += 1;
       }
 
-      if (resultCount)
-        resultCount.textContent = `${filteredPosts.length} results`;
       renderPagination();
     }
 
@@ -404,28 +390,6 @@ const pageButtonClass =
       page = Math.min(Math.max(1, nextPage), totalPages());
       updatePageInUrl(page, method);
       render();
-    }
-
-    function onSearchInput() {
-      const nextSearch = searchInput?.value ?? "";
-
-      if (page !== 1) {
-        page = 1;
-        updatePageInUrl(page, "replaceState");
-        render();
-      }
-
-      window.clearTimeout(searchTimer);
-      searchTimer = window.setTimeout(() => {
-        const query = nextSearch.toLowerCase();
-        filteredPosts = posts.filter(
-          (post) =>
-            post.title.includes(query) ||
-            post.tags.some((tag) => tag.includes(query)) ||
-            post.category.includes(query),
-        );
-        render();
-      }, 300);
     }
 
     function onPaginationClick(event: MouseEvent) {
@@ -454,14 +418,11 @@ const pageButtonClass =
       render();
     }
 
-    searchInput?.addEventListener("input", onSearchInput);
     pagination?.addEventListener("click", onPaginationClick);
     window.addEventListener("popstate", syncPageFromUrl);
     render();
 
     cleanupPostBrowser = () => {
-      window.clearTimeout(searchTimer);
-      searchInput?.removeEventListener("input", onSearchInput);
       pagination?.removeEventListener("click", onPaginationClick);
       window.removeEventListener("popstate", syncPageFromUrl);
     };

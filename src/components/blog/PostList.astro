@@ -20,13 +20,7 @@ const lastVisibleIndex = pageSize ? firstVisibleIndex + pageSize : posts.length;
     const isVisible = index >= firstVisibleIndex && index < lastVisibleIndex;
 
     return (
-      <div
-        data-post-item
-        data-title={post.title.toLowerCase()}
-        data-tags={JSON.stringify(post.tags.map((tag) => tag.toLowerCase()))}
-        data-category={post.category?.toLowerCase() ?? ""}
-        hidden={!isVisible}
-      >
+      <div data-post-item hidden={!isVisible}>
         <PostCard post={post} />
       </div>
     );
