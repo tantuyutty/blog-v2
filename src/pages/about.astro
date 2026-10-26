@@ -16,8 +16,10 @@ import InlineIcon from "@/components/about/InlineIcon.astro";
 import ExternalLink from "@/components/about/ExternalLink.astro";
 import ExperienceSection from "@/components/about/ExperienceSection.astro";
 import SlidesList from "@/components/about/SlidesList.astro";
+import ProjectsSection from "@/components/about/ProjectsSection.astro";
 import { slides } from "@/data/slides";
 import { experienceItems } from "@/data/experience";
+import { projects } from "@/data/projects";
 ---
 
 <Layout
@@ -276,6 +278,7 @@ import { experienceItems } from "@/data/experience";
         互相。
       </p>
       <ExperienceSection items={experienceItems} />
+      <ProjectsSection items={projects} />
     </div>
   </main>
 </Layout>

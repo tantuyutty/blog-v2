@@ -1,0 +1,35 @@
+---
+import ProjectCard from "@/components/about/ProjectCard.astro";
+import type { Project } from "@/data/projects";
+
+interface Props {
+  items: readonly Project[];
+}
+
+const { items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <section aria-labelledby="projects">
+    <h2 id="projects">專案</h2>
+    <p>
+      一些從自己的需求與工具探索出來的專案。規模不大，但都有從專案中學習到各種開發工具與技術的經驗。
+    </p>
+
+    <ul class="project-list not-typeset" data-not-typeset>
+      {items.map((project) => (
+        <li>
+          <ProjectCard project={project} />
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .project-list {
+    margin: 1.75rem 0 2.75rem;
+    padding: 0;
+    list-style: none;
+  }
+</style>
