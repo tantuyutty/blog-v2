@@ -9,6 +9,10 @@
       "pattern": "blog.tantuyu.dev",
       "custom_domain": true,
     },
+    {
+      "pattern": "tantuyu.dev",
+      "custom_domain": true,
+    },
   ],
   "assets": {
     "directory": "./dist",
